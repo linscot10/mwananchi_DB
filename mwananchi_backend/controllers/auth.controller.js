@@ -51,7 +51,7 @@ res.status(500).json({
 const loginController= async(req,res)=>{
     try {
         const{identifier,password}=req.body
-console.log('Identifier received:', identifier);
+ console.log('Identifier received:', identifier);
 
         const user = await User.findOne({
             $or:[{email:identifier},{userName:identifier}]
@@ -98,7 +98,71 @@ console.log('Identifier received:', identifier);
     
 }
 
+const getOneUser=async(req,res)=>{
+    try {
+        const user= await User.findById(req.params.id).select('-password')
+        if(!user){
+            console.log('User not found!!')
+            return res.status(404).json({
+                success:false,
+                message:"User Not Found"
+            })
+           
+        }
+res.status(200).json({
+    success:true,
+    user
+})
+
+        
+    } catch (error) {
+          console.error("Something Happened", error)
+        res.status(500).json({
+            success: false,
+            message: "error in fetching users",
+            error:error.message
+        })
+    }
+}
+
+const allUserController=async(req,res)=>{
+    try {
+        const user = await User.find()
+        console.log(user);
+        
+
+        if(!user){
+            console.log('No User Found')
+            res.status(404).json({
+            success:false,
+            message:"error in feftching all users",
+            error:error.message
+            })
+       }
+    
+        res.status(200).json({
+            success:true,
+           user,
+            
+            })
+    }
+   catch (error) {
+         console.error("Something Happened", error)
+        res.status(500).json({
+            success: false,
+            message: "error in fetching users",
+            error:error.message
+        })
+    }
+}
+       
+        
+   
+
+
 module.exports={
     registerController,
-    loginController
+    loginController,
+    allUserController,
+    getOneUser
 }
