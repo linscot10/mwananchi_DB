@@ -11,7 +11,10 @@ const registerController = async (req, res) => {
         const usernameExist = await User.findOne({ userName })
         if (usernameExist || emailExist) {
             console.log('user exists')
-            throw new Error("user exists")
+            return res.status(401).json({
+                success: false,
+                message: 'user exists',
+            });
         }
 
         const salt = await bcrypt.genSalt(10)
@@ -47,22 +50,32 @@ res.status(500).json({
 
 const loginController= async(req,res)=>{
     try {
-        const{email,password,userName}=req.body
+        const{identifier,password}=req.body
+console.log('Identifier received:', identifier);
 
-        const user = await User.findOne({email})
+        const user = await User.findOne({
+            $or:[{email:identifier},{userName:identifier}]
+        })
 
+        console.log('User found:', user);
         if(!user) {
-            res.status(401)
-            throw new Error('Invalid email , userName or password')
+            // res.status(401)
+            // throw new Error('Invalid email , userName or password')
             console.log("User Does not exist")
+             return res.status(401).json({
+                success: false,
+                message: 'Invalid email, userName or password',
+            });
         }
-        const isMatch = await bcrypt.compare(passsword,user.password)
-        if(isMatch){
-            res.status(401)
-            throw new Error('Invalid email , userName or password')
+        const isMatch = await bcrypt.compare(password,user.password)
+        if(!isMatch){
+         return res.status(401).json({
+                success: false,
+                message: 'Invalid email, userName or password',
+            });
         }
 
-        await user.save()
+       
         res.status(200).json({
             success:true,
             message:'user logged in ',
@@ -79,7 +92,7 @@ const loginController= async(req,res)=>{
         res.status(500).json({
             success: false,
             message: "Something Went Wrong",
-            error
+            error:error.message
         })
     }
     
