@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
     },
     userName: {
         type: String,
-        required: [true, 'field is required']
+        required: [true, 'field is required'],
+        unique:true
     },
     location: {
         type: String,
